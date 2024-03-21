@@ -1,7 +1,6 @@
 import { Add, Delete } from '@mui/icons-material';
 import { Autocomplete, Box, Button, Fab, TextField } from '@mui/material';
 import React from 'react';
-import { supportLanguages } from '../../../utils';
 import useResourceEditor from './useResourceEditor';
 import CreateTranslationDialog from './CreateTranslationDialog';
 import TranslationEditor from './TranslationEditor';
@@ -51,14 +50,10 @@ export default function ResourceEditor() {
                     </Button>
                 </Box>
 
-                {supportLanguages.map((language) => (
-                    <TranslationEditor
-                        handleUpdateTranslation={handleUpdateTranslation}
-                        key={language}
-                        keyInputValue={keyInputValue}
-                        language={language}
-                    />
-                ))}
+                <TranslationEditor
+                    handleUpdateTranslation={handleUpdateTranslation}
+                    keyInputValue={keyInputValue}
+                />
             </Box>
 
             <Fab

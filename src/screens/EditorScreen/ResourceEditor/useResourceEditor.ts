@@ -2,7 +2,7 @@ import { FormikConfig, FormikHelpers } from 'formik';
 import { useCallback, useEffect, useState } from 'react';
 import { ResourceContextProps } from '../../../contexts';
 import { useResourceContext } from '../../../hooks';
-import { Language, Resources } from '../../../types';
+import { Resources } from '../../../types';
 import { isNotNil } from '../../../utils';
 
 export interface CreateTranslationProps {
@@ -10,8 +10,9 @@ export interface CreateTranslationProps {
 }
 
 export interface UpdateTranslationProps {
-    content: string;
-    language: Language;
+    en_content: string;
+    de_content: string;
+    fr_content: string;
 }
 
 export type UseResourceEditorReturns = Pick<ResourceContextProps, 'isConnect' | 'keyOptions'> & {
@@ -80,11 +81,13 @@ export default function useResourceEditor(): UseResourceEditorReturns {
     ]);
 
     const handleUpdateTranslation = useCallback((
-        { content, language }: UpdateTranslationProps,
+        { en_content, de_content, fr_content }: UpdateTranslationProps,
         { setSubmitting }: FormikHelpers<UpdateTranslationProps>,
     ) => {
         const newResources: Resources = JSON.parse(JSON.stringify(resources));
-        newResources[language][selectedBundleOption][keyInputValue] = content;
+        newResources.en[selectedBundleOption][keyInputValue] = en_content;
+        newResources.de[selectedBundleOption][keyInputValue] = de_content;
+        newResources.fr[selectedBundleOption][keyInputValue] = fr_content;
         handleResourcesUpdate(newResources);
         setSubmitting(false);
     }, [
