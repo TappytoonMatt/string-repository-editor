@@ -45,21 +45,19 @@ export default function useResourceEditor(): UseResourceEditorReturns {
         { translation }: CreateTranslationProps,
         { setSubmitting }: FormikHelpers<CreateTranslationProps>,
     ) => {
-        // TODO: POST /bundles/{bundleId}/translations
-
         if (isNotNil((resources as Resources).de[selectedBundleOption][translation])
             || isNotNil((resources as Resources).en[selectedBundleOption][translation])
             || isNotNil((resources as Resources).fr[selectedBundleOption][translation])) {
-            return;
-        } else {
-            const newResources: Resources = JSON.parse(JSON.stringify(resources));
-            newResources.de[selectedBundleOption][translation] = '';
-            newResources.en[selectedBundleOption][translation] = '';
-            newResources.fr[selectedBundleOption][translation] = '';
-            handleResourcesUpdate(newResources);
             setKeyInputValue(translation);
+            return;
         }
 
+        const newResources: Resources = JSON.parse(JSON.stringify(resources));
+        newResources.de[selectedBundleOption][translation] = '';
+        newResources.en[selectedBundleOption][translation] = '';
+        newResources.fr[selectedBundleOption][translation] = '';
+        handleResourcesUpdate(newResources);
+        setKeyInputValue(translation);
         setSubmitting(false);
     }, [
         handleResourcesUpdate,
@@ -68,8 +66,6 @@ export default function useResourceEditor(): UseResourceEditorReturns {
     ]);
 
     const handleRemoveTranslation = useCallback(() => {
-        // TODO: DELETE /bundles/{bundleId}/translations
-
         const newResources: Resources = JSON.parse(JSON.stringify(resources));
         delete newResources.de[selectedBundleOption][keyInputValue];
         delete newResources.en[selectedBundleOption][keyInputValue];
@@ -87,8 +83,6 @@ export default function useResourceEditor(): UseResourceEditorReturns {
         { content, language }: UpdateTranslationProps,
         { setSubmitting }: FormikHelpers<UpdateTranslationProps>,
     ) => {
-        // TODO: PUT /translations/{translationId}
-
         const newResources: Resources = JSON.parse(JSON.stringify(resources));
         newResources[language][selectedBundleOption][keyInputValue] = content;
         handleResourcesUpdate(newResources);

@@ -1,48 +1,45 @@
-import React, { ChangeEvent, createContext, PropsWithChildren, useCallback, useEffect, useState } from 'react';
+import React, { createContext, PropsWithChildren, useCallback, useEffect, useState } from 'react';
 import { IpcRendererEvent } from 'electron';
 import { useSnackbarContext } from '../../hooks';
-import { Resources, ResourceTemplateKeys } from '../../types';
+import { Resources } from '../../types';
 import { checkResources, isNotNil, NOOP } from '../../utils';
-import useBundleSelect from './useBundleSelect';
-import useResourceFilePath from './useResourceFilePath';
+import useBundleSelect, { type UseBundleSelectReturns } from './useBundleSelect';
+import useResourceFilePath, { type UseResourceFilePathReturns } from './useResourceFilePath';
 
-export interface ResourceContextProps {
-    bundleOptions: ResourceTemplateKeys[];
-    isConnect: boolean;
-    keyOptions: string[];
-    resourceFilePath: string;
-    resources: Resources | null;
-    selectedBundleOption: ResourceTemplateKeys;
-    setSelectedBundleOption: (option: ResourceTemplateKeys) => void;
-    handleReloadResourceFile: () => void;
-    handleResourceFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
-    handleResourcesUpdate: (newResources: Resources) => void;
-}
+export type ResourceContextProps =
+    {
+        handleResourcesUpdate: (newResources: Resources) => void;
+        isConnect: boolean;
+        onReloadResources: () => void;
+        resources: Resources | null;
+    }
+    & UseBundleSelectReturns
+    & UseResourceFilePathReturns;
 
 export const ResourceContext = createContext<ResourceContextProps>({
     bundleOptions: [],
+    directoryPath: '',
+    handleResourcesUpdate: NOOP,
     isConnect: false,
     keyOptions: [],
-    resourceFilePath: '',
+    onDirectoryChangePress: NOOP,
+    onReloadResources: NOOP,
     resources: null,
     selectedBundleOption: 'one-dialog',
     setSelectedBundleOption: NOOP,
-    handleReloadResourceFile: NOOP,
-    handleResourceFileChange: NOOP,
-    handleResourcesUpdate: NOOP,
 });
 
 export function ResourceProvider(props: PropsWithChildren<{}>) {
     const { children } = props;
 
+    const [resources, setResources] = useState<Resources | null>(null);
+
     const { handleOpenSnackbar } = useSnackbarContext();
 
     const {
-        handleResourceFilePathChange,
-        resourceFilePath,
+        directoryPath,
+        onDirectoryChangePress,
     } = useResourceFilePath();
-
-    const [resources, setResources] = useState<Resources | null>(null);
 
     const {
         bundleOptions,
@@ -53,48 +50,60 @@ export function ResourceProvider(props: PropsWithChildren<{}>) {
 
     useEffect(() => {
         const handleSuccessReadResources = (_: IpcRendererEvent, ...args: any[]) => {
-            const [resources, message] = args;
-            setResources(checkResources(resources) ? resources : null);
-            if (isNotNil(message)) {
-                handleOpenSnackbar(message as string);
+            const [webResources, appResources] = args;
+
+            if (!checkResources(webResources) || !checkResources(appResources)) {
+                handleOpenSnackbar('Invalid folder path. Please choose a correct directory.');
+                return;
             }
+
+            setResources(webResources);
         };
 
-        window.ipcRenderer.receive('success_update_resources', handleSuccessReadResources);
-        return () => window.ipcRenderer.removeListener('success_update_resources', handleSuccessReadResources);
+        const handleFailureReadResources = (_: IpcRendererEvent, ...args: any[]) => {
+            const [errorMessage] = args;
+            handleOpenSnackbar(errorMessage);
+            setResources(null);
+        };
+
+        const handleSuccessUpdateResources = (_: IpcRendererEvent, ...args: any[]) => {
+            const [updatedResources] = args;
+            setResources(updatedResources);
+        };
+
+        window.ipcRenderer.addListener('success_read_resources', handleSuccessReadResources);
+        window.ipcRenderer.addListener('failure_read_resources', handleFailureReadResources);
+        window.ipcRenderer.addListener('success_update_resources', handleSuccessUpdateResources);
+        return () => {
+            window.ipcRenderer.removeListener('success_read_resources', handleSuccessReadResources);
+            window.ipcRenderer.removeListener('failure_read_resources', handleFailureReadResources);
+            window.ipcRenderer.removeListener('success_update_resources', handleSuccessUpdateResources);
+        };
     }, []);
 
-    const handleReloadResourceFile = useCallback(() => {
-        window.ipcRenderer.send('input_resources', resourceFilePath);
-    }, [resourceFilePath]);
-
-    const handleResourceFileChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-        const { target: { files } } = event;
-        const currentFile = files?.[0] as File & { path: string };
-        handleResourceFilePathChange(currentFile.path);
-    }, []);
+    const onReloadResources = useCallback(() => {
+        window.ipcRenderer.send('read_resources', directoryPath);
+    }, [directoryPath]);
 
     const handleResourcesUpdate = useCallback((updatedResources: Resources) => {
-        // TODO: POST /namespaces/{namespaceId}/manifests
-
         window.ipcRenderer.send('update_resources', {
-            path: resourceFilePath,
+            directoryPath,
             updatedResources,
         });
-    }, [resourceFilePath]);
+    }, [directoryPath]);
 
     return (
         <ResourceContext.Provider value={{
             bundleOptions,
+            directoryPath,
+            handleResourcesUpdate,
             isConnect: isNotNil(resources),
             keyOptions,
-            resourceFilePath,
+            onDirectoryChangePress,
+            onReloadResources,
             resources,
             selectedBundleOption,
             setSelectedBundleOption,
-            handleReloadResourceFile,
-            handleResourceFileChange,
-            handleResourcesUpdate,
         }}>
             {children}
         </ResourceContext.Provider>

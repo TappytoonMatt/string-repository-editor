@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Resources, ResourceTemplateKeys } from '../../types';
-import { ResourceContextProps } from './index';
 
 const standardLanguage = 'en';
 
-type UseBundleSelectReturns = Pick<ResourceContextProps, 'bundleOptions' | 'keyOptions' | 'selectedBundleOption' | 'setSelectedBundleOption'>;
+export interface UseBundleSelectReturns {
+    bundleOptions: ResourceTemplateKeys[];
+    keyOptions: string[];
+    selectedBundleOption: ResourceTemplateKeys;
+    setSelectedBundleOption: (option: ResourceTemplateKeys) => void;
+}
 
 export default function useBundleSelect(resources: Resources | null): UseBundleSelectReturns {
     const bundleOptions = useMemo<ResourceTemplateKeys[]>(() => {

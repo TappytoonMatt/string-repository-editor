@@ -5,12 +5,13 @@ import { useResourceContext } from '../../../hooks';
 
 export default function ResourceFileInput() {
     const {
-        handleReloadResourceFile,
-        handleResourceFileChange,
-        resourceFilePath,
+        directoryPath,
+        isConnect,
+        onDirectoryChangePress,
+        onReloadResources,
     } = useResourceContext();
 
-    const buttonTitle = resourceFilePath ? 'Change file' : 'Choose file';
+    const buttonTitle = directoryPath ? 'Change directory' : 'Choose directory';
 
     return (
         <Box style={{
@@ -20,28 +21,23 @@ export default function ResourceFileInput() {
         }}>
             <Button
                 component="label"
+                onClick={onDirectoryChangePress}
                 variant={'contained'}
             >
                 <Typography
                     children={buttonTitle}
                     variant={'button'}
                 />
-
-                <input
-                    hidden={true}
-                    onChange={handleResourceFileChange}
-                    type={'file'}
-                />
             </Button>
 
             <Typography
-                children={resourceFilePath}
+                children={directoryPath}
                 variant={'body2'}
             />
 
             <Button
-                disabled={!resourceFilePath}
-                onClick={handleReloadResourceFile}
+                disabled={!isConnect}
+                onClick={onReloadResources}
             >
                 <Cached/>
             </Button>

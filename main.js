@@ -1,6 +1,9 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
+
+const WEB_RESOURCE_PATH = 'services/web-service/gsr/resources.json';
+const APP_RESOURCE_PATH = 'services/native-service/resources/jsons/gsr-default-resources.json';
 
 function createWindow() {
     const browserWindow = new BrowserWindow({
@@ -30,19 +33,39 @@ app.on('window-all-closed', () => {
     }
 });
 
-ipcMain.on('input_resources', (event, path) => {
+ipcMain.on('input_directory', (event) => {
     try {
-        const resources = fs.readFileSync(path, 'utf8');
-        event.reply('success_update_resources', JSON.parse(resources));
+        const directoryPath = dialog.showOpenDialogSync({ properties: ['openDirectory'] });
+        event.reply('success_input_directory', directoryPath);
     } catch (ex) {
         console.error(ex);
     }
 });
 
-ipcMain.on('update_resources', (event, { path, updatedResources }) => {
+ipcMain.on('read_resources', (event, directoryPath) => {
     try {
-        fs.writeFileSync(path, JSON.stringify(updatedResources, null, 2));
-        event.reply('success_update_resources', updatedResources, 'Update was successful');
+        const webResources = fs.readFileSync(`${directoryPath}/${WEB_RESOURCE_PATH}`, 'utf8');
+        const appResources = fs.readFileSync(`${directoryPath}/${APP_RESOURCE_PATH}`, 'utf8');
+
+        event.reply(
+            'success_read_resources',
+            JSON.parse(webResources),
+            JSON.parse(appResources),
+        );
+    } catch (ex) {
+        console.error(ex);
+        event.reply('failure_read_resources', ex.message);
+    }
+});
+
+ipcMain.on('update_resources', (event, { directoryPath, updatedResources }) => {
+    try {
+        const data = JSON.stringify(updatedResources, null, 2);
+
+        fs.writeFileSync(`${directoryPath}/${WEB_RESOURCE_PATH}`, data);
+        fs.writeFileSync(`${directoryPath}/${APP_RESOURCE_PATH}`, data);
+
+        event.reply('success_update_resources', updatedResources);
     } catch (ex) {
         console.error(ex);
     }

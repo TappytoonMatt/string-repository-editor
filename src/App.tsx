@@ -18,7 +18,7 @@ declare global {
     interface Window {
         ipcRenderer: {
             send: (channel: string, data?: any) => void;
-            receive: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) => void;
+            addListener: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) => void;
             removeListener: (channel: string, listener: (event: IpcRendererEvent, ...args: any[]) => void) => void;
         };
     }

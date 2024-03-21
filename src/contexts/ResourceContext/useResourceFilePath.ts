@@ -1,20 +1,22 @@
 import { useCallback, useEffect, useState } from 'react';
+import { IpcRendererEvent } from 'electron';
 
 const STORAGE_KEY = '@resourceFilePath';
 
-interface UseResourceFilePathReturns {
-    handleResourceFilePathChange: (path: string) => void;
-    resourceFilePath: string;
+export interface UseResourceFilePathReturns {
+    directoryPath: string;
+    onDirectoryChangePress: () => void;
 }
 
 export default function useResourceFilePath(): UseResourceFilePathReturns {
-    const [resourceFilePath, setResourceFilePath] = useState<string>('');
+    const [directoryPath, setDirectoryPath] = useState<string>('');
 
     useEffect(() => {
         const initialize = async () => {
             const storedResourceFilePath = await localStorage.getItem(STORAGE_KEY);
             if (storedResourceFilePath) {
-                setResourceFilePath(storedResourceFilePath);
+                setDirectoryPath(storedResourceFilePath);
+                window.ipcRenderer.send('read_resources', storedResourceFilePath);
             }
         };
 
@@ -22,22 +24,29 @@ export default function useResourceFilePath(): UseResourceFilePathReturns {
     }, []);
 
     useEffect(() => {
-        if (resourceFilePath) {
-            window.ipcRenderer.send('input_resources', resourceFilePath);
-        }
-    }, [resourceFilePath]);
+        const handleSuccessInputDirectory = (_: IpcRendererEvent, ...args: any[]) => {
+            const [directoryPath] = args;
 
-    const handleResourceFilePathChange = useCallback(async (path: string) => {
-        try {
-            await localStorage.setItem(STORAGE_KEY, path);
-            setResourceFilePath(path);
-        } catch (ex) {
-            console.error(ex);
-        }
+            if (!directoryPath) {
+                return;
+            }
+
+            setDirectoryPath(directoryPath);
+            localStorage.setItem(STORAGE_KEY, directoryPath);
+            window.ipcRenderer.send('read_resources', directoryPath);
+        };
+
+        window.ipcRenderer.addListener('success_input_directory', handleSuccessInputDirectory);
+        return () => window.ipcRenderer.removeListener('success_input_directory', handleSuccessInputDirectory);
+    }, []);
+
+
+    const onDirectoryChangePress = useCallback(() => {
+        window.ipcRenderer.send('input_directory');
     }, []);
 
     return {
-        handleResourceFilePathChange,
-        resourceFilePath,
+        directoryPath,
+        onDirectoryChangePress,
     };
 }
