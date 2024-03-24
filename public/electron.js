@@ -22,7 +22,6 @@ function createWindow() {
         protocol: 'file:',
         slashes: true,
     });
-    console.log({ startURL });
 
     browserWindow.loadURL(startURL).catch((ex) => console.error(ex));
 }
