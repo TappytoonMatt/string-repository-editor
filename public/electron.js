@@ -1,6 +1,7 @@
 const { app, BrowserWindow, dialog, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const url = require('url');
 
 const WEB_RESOURCE_PATH = 'services/web-service/gsr/resources.json';
 const APP_RESOURCE_PATH = 'services/native-service/resources/jsons/gsr-default-resources.json';
@@ -16,7 +17,14 @@ function createWindow() {
         },
     });
 
-    browserWindow.loadURL('http://localhost:3000').catch((ex) => console.error(ex));
+    const startURL = process.env.ELECTRON_START_URL || url.format({
+        pathname: path.join(__dirname, '/../build/index.html'),
+        protocol: 'file:',
+        slashes: true,
+    });
+    console.log({ startURL });
+
+    browserWindow.loadURL(startURL).catch((ex) => console.error(ex));
 }
 
 app.whenReady().then(createWindow);

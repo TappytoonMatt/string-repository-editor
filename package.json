@@ -2,9 +2,11 @@
   "name": "string-resources-editor",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "public/electron.js",
+  "homepage": "./",
   "scripts": {
-    "start": "concurrently \"BROWSER=none react-scripts start\" \"wait-on http://localhost:3000 && electron .\"",
+    "start": "concurrently \"BROWSER=none react-scripts start\" \"wait-on http://localhost:3000 && ELECTRON_START_URL=http://localhost:3000 electron .\"",
+    "build": "react-scripts build && electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -22,6 +24,7 @@
     "concurrently": "^8.2.2",
     "css-loader": "^6.9.1",
     "electron": "^28.2.0",
+    "electron-builder": "23.6.0",
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.6.0",
     "react": "^18.2.0",
