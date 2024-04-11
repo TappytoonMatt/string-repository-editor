@@ -1,4 +1,4 @@
-import { Language, Resources, ResourceTemplate } from '../types';
+import { AnyObject, Language, Resources, ResourceTemplate } from '../types';
 
 export const checkResources = (resources: Resources): boolean => {
     for (const language of supportLanguages) {
@@ -27,3 +27,16 @@ export const NOOP = () => {
 
 export const supportLanguages: Language[] = ['de', 'en', 'fr'];
 
+export const sortObject = (object: AnyObject): AnyObject => {
+    if (typeof object !== 'object') {
+        return object;
+    }
+
+    const sortedObject: AnyObject = {};
+
+    Object.keys(object).sort().forEach((key) => {
+        sortedObject[key] = sortObject(object[key]);
+    });
+
+    return sortedObject;
+};
