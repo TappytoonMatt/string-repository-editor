@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ResourceContextProps } from '../../../contexts';
 import { useResourceContext } from '../../../hooks';
 import { Resources } from '../../../types';
-import { isNotNil, sortObject } from '../../../utils';
+import { isNotNil } from '../../../utils';
 
 export interface CreateTranslationProps {
     translation: string;
@@ -57,8 +57,7 @@ export default function useResourceEditor(): UseResourceEditorReturns {
         newResources.de[selectedBundleOption][translation] = '';
         newResources.en[selectedBundleOption][translation] = '';
         newResources.fr[selectedBundleOption][translation] = '';
-        const sortedResources = sortObject(newResources) as Resources;
-        handleResourcesUpdate(sortedResources);
+        handleResourcesUpdate(newResources);
         setKeyInputValue(translation);
         setSubmitting(false);
     }, [

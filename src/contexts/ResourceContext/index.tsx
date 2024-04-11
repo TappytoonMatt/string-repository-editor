@@ -2,7 +2,7 @@ import React, { createContext, PropsWithChildren, useCallback, useEffect, useSta
 import { IpcRendererEvent } from 'electron';
 import { useSnackbarContext } from '../../hooks';
 import { Resources } from '../../types';
-import { checkResources, isNotNil, NOOP } from '../../utils';
+import { checkResources, isNotNil, NOOP, sortObject } from '../../utils';
 import useBundleSelect, { type UseBundleSelectReturns } from './useBundleSelect';
 import useResourceFilePath, { type UseResourceFilePathReturns } from './useResourceFilePath';
 
@@ -86,9 +86,10 @@ export function ResourceProvider(props: PropsWithChildren<{}>) {
     }, [directoryPath]);
 
     const handleResourcesUpdate = useCallback((updatedResources: Resources) => {
+        const sortedResources = sortObject(updatedResources);
         window.ipcRenderer.send('update_resources', {
             directoryPath,
-            updatedResources,
+            updatedResources: sortedResources,
         });
     }, [directoryPath]);
 
