@@ -53,7 +53,7 @@ export default function useResourceEditor(): UseResourceEditorReturns {
             return;
         }
 
-        const newResources: Resources = JSON.parse(JSON.stringify(resources));
+        const newResources: Resources = structuredClone(resources as Resources);
         newResources.de[selectedBundleOption][translation] = '';
         newResources.en[selectedBundleOption][translation] = '';
         newResources.fr[selectedBundleOption][translation] = '';
@@ -67,7 +67,7 @@ export default function useResourceEditor(): UseResourceEditorReturns {
     ]);
 
     const handleRemoveTranslation = useCallback(() => {
-        const newResources: Resources = JSON.parse(JSON.stringify(resources));
+        const newResources: Resources = structuredClone(resources as Resources);
         delete newResources.de[selectedBundleOption][keyInputValue];
         delete newResources.en[selectedBundleOption][keyInputValue];
         delete newResources.fr[selectedBundleOption][keyInputValue];
@@ -84,7 +84,7 @@ export default function useResourceEditor(): UseResourceEditorReturns {
         { en_content, de_content, fr_content }: UpdateTranslationProps,
         { setSubmitting }: FormikHelpers<UpdateTranslationProps>,
     ) => {
-        const newResources: Resources = JSON.parse(JSON.stringify(resources));
+        const newResources: Resources = structuredClone(resources as Resources);
         newResources.en[selectedBundleOption][keyInputValue] = en_content;
         newResources.de[selectedBundleOption][keyInputValue] = de_content;
         newResources.fr[selectedBundleOption][keyInputValue] = fr_content;
