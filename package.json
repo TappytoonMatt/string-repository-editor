@@ -58,5 +58,16 @@
     "formik": "^2.4.5",
     "formik-material-ui": "^4.0.0-alpha.2",
     "react-json-tree": "^0.18.0"
+  },
+  "build": {
+    "mac": {
+      "target": {
+        "target": "default",
+        "arch": [
+          "x64",
+          "arm64"
+        ]
+      }
+    }
   }
 }
