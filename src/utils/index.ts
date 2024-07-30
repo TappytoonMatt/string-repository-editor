@@ -25,7 +25,7 @@ export const isNotNil = (value: any) => {
 export const NOOP = () => {
 };
 
-export const supportLanguages: Language[] = ['de', 'en', 'fr'];
+export const supportLanguages: Language[] = ['en', 'de', 'fr'];
 
 export const sortObject = (object: AnyObject): AnyObject => {
     if (typeof object !== 'object') {
